@@ -5,9 +5,8 @@
   <body>
     <script>
       fetch('https://maxday.github.io/trending/input.json')
-      .then(res => res.json())
       .then(res => {
-          console.log('res', res);
+        console.log('res0', res);
       })
       .catch(err => console.log('err', err));
       });
