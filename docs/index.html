@@ -1,0 +1,16 @@
+<html>
+  <head>
+    <title>Trending</title>
+  </head>
+  <body>
+    <script>
+      fetch('input.json')
+      .then(res => res.json())
+      .then(res => {
+          console.log('res', res);
+      })
+      .catch(err => console.log('err', err));
+      });
+    </script>
+  </body>
+</html>
