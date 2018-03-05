@@ -23,11 +23,13 @@
     <script>
       let finalOBject;
 
+      console.log(window.location);
+
       const checkForInitialLanguage = () => {
-        const searchFragment = window.location.search;
+        const searchFragment = window.location.hash;
         if(searchFragment) {
           console.log(searchFragment);
-          const language = searchFragment.replace("?language=", "");
+          const language = searchFragment.replace("#", "");
           console.log(language);
           updateList(language);
         }
@@ -77,7 +79,10 @@
           tbody.appendChild(tr);
         });
         const selectInput = document.getElementById('language');
+        console.log(selectInput);
+        console.log(language);
         selectInput.value = language;
+        window.location.hash = language;
       }
 
     </script>
