@@ -1,47 +1,38 @@
 <html>
   <head>
     <title>Trending</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
   </head>
   <body>
 
     <div class="form-group">
     <label for="language">Choose a language</label>
-    <select class="form-control" id="language" />
+    <select class="form-control" id="language" onchange="languageChanged(this)"></select>
   </div>
 
     <table class="table">
   <thead>
     <tr>
       <th scope="col">#</th>
-      <th scope="col">First</th>
-      <th scope="col">Last</th>
-      <th scope="col">Handle</th>
+      <th scope="col">Repository name</th>
     </tr>
   </thead>
-  <tbody>
-    <tr>
-      <th scope="row">1</th>
-      <td>Mark</td>
-      <td>Otto</td>
-      <td>@mdo</td>
-    </tr>
-    <tr>
-      <th scope="row">2</th>
-      <td>Jacob</td>
-      <td>Thornton</td>
-      <td>@fat</td>
-    </tr>
-    <tr>
-      <th scope="row">3</th>
-      <td>Larry</td>
-      <td>the Bird</td>
-      <td>@twitter</td>
-    </tr>
-  </tbody>
+  <tbody id="repoBody"></tbody>
 </table>
 
     <script>
+      let finalOBject;
+
+      const checkForInitialLanguage = () => {
+        const searchFragment = window.location.search;
+        if(searchFragment) {
+          console.log(searchFragment);
+          const language = searchFragment.replace("?language=", "");
+          console.log(language);
+          updateList(language);
+        }
+      }
+  
 
       fetch('./language.json')
       .then(res => res.json())
@@ -57,12 +48,38 @@
       .catch(err => console.log('err', err));
 
 
-      fetch('./input.json')
+      fetch('./data.json')
       .then(res => res.json())
       .then(res => {
-          console.log('res', res);
+        finalOBject = res;
+        checkForInitialLanguage();
       })
       .catch(err => console.log('err', err));
+
+      const languageChanged = (select) => {
+        updateList(select.value);
+      }
+
+      const updateList = (language) => {
+        const repositoriesToDisplay = finalOBject[language];
+        let idx = 0;
+        const tbody = document.getElementById("repoBody")
+        tbody.innerHTML = "";
+        repositoriesToDisplay.map(repo => {
+          let tr = document.createElement('tr');
+          let th = document.createElement('th');
+          th.scope = "row";
+          th.innerHTML = ++idx;
+          tr.appendChild(th);
+          let td = document.createElement('td');
+          td.innerHTML = repo;
+          tr.appendChild(td);
+          tbody.appendChild(tr);
+        });
+        const selectInput = document.getElementById('language');
+        selectInput.value = language;
+      }
+
     </script>
   </body>
 </html>
