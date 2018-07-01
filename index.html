@@ -4,6 +4,7 @@
       <title>Trending</title>
    </head>
    <body>
+      <span>Select your language : <span id="selectedLanguage"></span></span>
       <ul id="languageList"></ul>
       <ul id="repoList"></ul>
       <span id="lastUpdatedInfo"></span>
@@ -16,31 +17,33 @@
          const makeGithubLink = (repo) => {
            return `${GITHUB_URL}${repo}`;
          }
-         const setUpdatedTime = (time, container) => {
+         const updateContainerWithText = (text, container) => {
            const containerElem = document.getElementById(container);
            if(containerElem) {
-             containerElem.innerHTML = `Last updated on ${time}`;
+             containerElem.innerHTML = text;
            }
          }
          const fetchTrendingData = (filename) => fetch(filename).then(res => res.json());
-         const buildLinks = (trendingData, languageContainerId, repoContainerId, lastUpdatedInfoContainerId) => {
+         const buildLinks = (trendingData, languageContainerId, repoContainerId, lastUpdatedInfoContainerId, selectedLanguageContainerId) => {
            const languageList = document.getElementById(languageContainerId);
            Object.keys(trendingData.data).sort().map(language => {
              let link = document.createElement('a');
              link.href = `#${language}`;
              link.innerHTML = `${transformNullLanguage(language)} | `;
-             link.addEventListener('click', (e) => refreshList(e, repoContainerId));
+             link.addEventListener('click', (e) => refreshList(e, repoContainerId, selectedLanguageContainerId));
              languageList.appendChild(link);
            });
             window.trendingData = trendingData;
-            setUpdatedTime(trendingData.extraData.createdAt, lastUpdatedInfoContainerId);
+            updateContainerWithText(`Last updated on ${trendingData.extraData.createdAt}`, lastUpdatedInfoContainerId);
          }
-         const checkForInitialLanguage = (location) => {
+         const checkForInitialLanguage = (location, containerId) => {
            const searchFragment = location;
+           let selectedLanguage = Object.keys(trendingData.data).sort()[0];
            if(searchFragment) {
-             return searchFragment.replace('#', '');
+             selectedLanguage = searchFragment.replace('#', '');
            }
-           return null;
+           updateContainerWithText(selectedLanguage, containerId);
+           return selectedLanguage;
          }
          const buildList = (language, containerId) => {
            const repositoriesToDisplay = window.trendingData.data[decodeURIComponent(language)];
@@ -58,16 +61,16 @@
            });
            window.location.hash = language;
          }
-         const refreshList = (e, containerId) => {
+         const refreshList = (e, containerId, selectedLanguageContainerId) => {
            const targetLocation = (e && e.target && e.target.href)
            ? e.target.href.substring(e.target.href.indexOf('#'))
            : window.location.hash;
-           return buildList(checkForInitialLanguage(targetLocation), containerId);
+           return buildList(checkForInitialLanguage(targetLocation, selectedLanguageContainerId), containerId);
          };
          document.addEventListener('DOMContentLoaded', function(event) {
            fetchTrendingData('data.json')
-           .then(trendingData => buildLinks(trendingData, 'languageList', 'repoList', 'lastUpdatedInfo'))
-           .then(() => refreshList(null, 'repoList'))
+           .then(trendingData => buildLinks(trendingData, 'languageList', 'repoList', 'lastUpdatedInfo', 'selectedLanguage'))
+           .then(() => refreshList(null, 'repoList', 'selectedLanguage'))
            .catch(err => console.log('err', err));
          });
       </script>
