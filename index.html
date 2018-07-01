@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en-US">
+   <head>
+      <title>Trending</title>
+   </head>
+   <body>
+      <ul id="languageList"></ul>
+      <ul id="result"></ul>
+      <script>
+         const OTHER_CATEGORY = 'Other';
+         const GITHUB_URL = 'https://github.com/'
+         const transformNullLanguage = (language) => {
+           return language === 'null' ? OTHER_CATEGORY : language;
+         }
+         const makeGithubLink = (repo) => {
+           return `${GITHUB_URL}${repo}`;
+         }
+         const fetchData = (filename) => fetch(filename).then(res => res.json());
+         const buildLinks = (data, containerId) => {
+           const languageList = document.getElementById(containerId);
+           data.sort().map(language => {
+             let link = document.createElement('a');
+             link.href = `#${language}`;
+             link.innerHTML = `${transformNullLanguage(language)} | `;
+             link.addEventListener('click', refreshList);
+             languageList.appendChild(link);
+           });
+         }
+         const checkForInitialLanguage = (location) => {
+           const searchFragment = location;
+           if(searchFragment) {
+             return searchFragment.replace('#', '');
+           }
+           return null;
+         }
+         const buildList = (language) => {
+           const repositoriesToDisplay = window.data[decodeURIComponent(language)];
+           let idx = 0;
+           const list = document.getElementById('result')
+           list.innerHTML = '';
+           repositoriesToDisplay.map(repo => {
+             let li = document.createElement('li');
+             let a = document.createElement('a');
+             a.innerHTML = `${++idx} - ${transformNullLanguage(repo)}`;
+             a.href = makeGithubLink(repo);
+             a.target = '_blank';
+             li.appendChild(a);
+             list.appendChild(li);
+           });
+           window.location.hash = language;
+         }
+         const refreshList = (e = null) => {
+           const targetLocation = (e && e.target && e.target.href)
+           ? e.target.href.substring(e.target.href.indexOf('#') + 1)
+           : window.location.hash;
+           return buildList(checkForInitialLanguage(targetLocation));
+         };
+         document.addEventListener('DOMContentLoaded', function(event) {
+           fetchData('language.json')
+           .then(data => buildLinks(data, 'languageList'))
+           .then(() => fetchData('data.json'))
+           .then(data => { window.data = data; } )
+           .then(() => refreshList())
+           .catch(err => console.log('err', err));
+         });
+      </script>
+   </body>
+</html>
